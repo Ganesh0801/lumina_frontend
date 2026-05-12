@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #C9A227;
+  --gold-dark: #8B6914;
+  --gold-light: #D4AA4A;
+  --dark: #0F0F0F;
+  --dark-2: #1A1A1A;
+  --dark-3: #282828;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  background: #0F0F0F;
+  color: #E8E8E8;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1A1A1A; }
+::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #D4AA4A; }
+
+/* Gold shimmer button */
+.btn-gold {
+  background: linear-gradient(135deg, #8B6914, #C9A227, #D4AA4A);
+  background-size: 200% auto;
+  transition: background-position 0.4s, transform 0.2s, box-shadow 0.2s;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.btn-gold:hover {
+  background-position: right center;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(201,162,39,0.4);
+}
+
+/* Glass card */
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(201,162,39,0.15);
+}
+
+/* Gold border glow */
+.gold-glow { box-shadow: 0 0 0 1px rgba(201,162,39,0.3), 0 4px 20px rgba(201,162,39,0.1); }
+.gold-glow:focus { box-shadow: 0 0 0 2px rgba(201,162,39,0.5); outline: none; }
+
+/* Input style */
+.input-dark {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,162,39,0.2);
+  color: #E8E8E8;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-dark:focus {
+  border-color: #C9A227;
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.15);
+  outline: none;
+}
+.input-dark::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #1A1A1A 25%, #282828 50%, #1A1A1A 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Star rating */
+.star-filled { color: #C9A227; }
+.star-empty { color: #383838; }
+
+/* Page transition */
+.page-enter { opacity: 0; transform: translateY(15px); }
+.page-enter-active { opacity: 1; transform: translateY(0); transition: all 0.4s ease; }
+
+/* Product card hover */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,162,39,0.2);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #C9A227, #D4AA4A, #E5C96B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tag badge */
+.badge-gold {
+  background: linear-gradient(135deg, #8B6914, #C9A227);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Notification dot */
+.notify-dot {
+  width: 8px; height: 8px;
+  background: #C9A227;
+  border-radius: 50%;
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+/* Table styles */
+.table-dark th { background: rgba(201,162,39,0.1); color: #C9A227; font-weight: 600; }
+.table-dark tr:hover td { background: rgba(255,255,255,0.02); }
+.table-dark td { border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+/* Status badge colors */
+.status-pending   { background: rgba(251,191,36,0.15); color: #FBB91C; border: 1px solid rgba(251,191,36,0.3); }
+.status-confirmed { background: rgba(59,130,246,0.15); color: #60A5FA; border: 1px solid rgba(59,130,246,0.3); }
+.status-processing{ background: rgba(139,92,246,0.15); color: #A78BFA; border: 1px solid rgba(139,92,246,0.3); }
+.status-shipped   { background: rgba(234,179,8,0.15);  color: #EAB308; border: 1px solid rgba(234,179,8,0.3); }
+.status-delivered { background: rgba(34,197,94,0.15);  color: #4ADE80; border: 1px solid rgba(34,197,94,0.3); }
+.status-cancelled { background: rgba(239,68,68,0.15);  color: #F87171; border: 1px solid rgba(239,68,68,0.3); }
+.status-refunded  { background: rgba(107,114,128,0.15);color: #9CA3AF; border: 1px solid rgba(107,114,128,0.3); }
