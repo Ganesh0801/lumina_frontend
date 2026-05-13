@@ -1,167 +1,116 @@
 import React from 'react';
-import { Star, Loader2 } from 'lucide-react';
+import { Star, Package } from 'lucide-react';
 
-export function LoadingSpinner({ size = 'md', text = '' }) {
-  const sizes = { sm: 'w-4 h-4', md: 'w-8 h-8', lg: 'w-12 h-12' };
+/* ── Loading Spinner ── */
+export function LoadingSpinner({ size = 'md', text }) {
+  const s = { sm: 'w-6 h-6', md: 'w-10 h-10', lg: 'w-14 h-14' }[size];
   return (
-    <div className="flex flex-col items-center justify-center gap-3 p-8">
-      <Loader2 className={`${sizes[size]} text-gold-400 animate-spin`} />
-      {text && <p className="text-dark-300 text-sm">{text}</p>}
+    <div className="flex flex-col items-center justify-center py-16 gap-3">
+      <div className={`${s} rounded-full border-3 border-[#EBEBEB] animate-spin`}
+        style={{ borderTopColor: '#C9A227', borderWidth: 3 }} />
+      {text && <p className="text-sm text-[#ABABAB] font-semibold">{text}</p>}
     </div>
   );
 }
 
-export function SkeletonCard() {
-  return (
-    <div className="glass rounded-2xl overflow-hidden">
-      <div className="skeleton h-56 w-full" />
-      <div className="p-4 space-y-3">
-        <div className="skeleton h-4 rounded w-3/4" />
-        <div className="skeleton h-4 rounded w-1/2" />
-        <div className="skeleton h-8 rounded w-full mt-2" />
-      </div>
-    </div>
-  );
-}
-
-export function StarRating({ rating, count, size = 'sm' }) {
-  const sizes = { sm: 'w-3.5 h-3.5', md: 'w-4 h-4', lg: 'w-5 h-5' };
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map(i => (
-        <Star key={i} className={`${sizes[size]} ${i <= Math.round(rating) ? 'star-filled fill-gold-400' : 'star-empty'}`} />
-      ))}
-      {count !== undefined && <span className="text-dark-300 text-xs ml-1">({count})</span>}
-    </div>
-  );
-}
+/* ── Status Badge ── */
+const STATUS = {
+  pending:    { label:'Pending',    cls:'bg-[#FFF8E1] text-[#F59E0B]' },
+  confirmed:  { label:'Confirmed',  cls:'bg-[#EFF6FF] text-[#3B82F6]' },
+  processing: { label:'Processing', cls:'bg-[#F5F3FF] text-[#8B5CF6]' },
+  shipped:    { label:'Shipped',    cls:'bg-[#FFFBEB] text-[#D97706]' },
+  delivered:  { label:'Delivered',  cls:'bg-[#F0FDF4] text-[#22C55E]' },
+  cancelled:  { label:'Cancelled',  cls:'bg-[#FEF2F2] text-[#EF4444]' },
+  refunded:   { label:'Refunded',   cls:'bg-[#F9FAFB] text-[#9CA3AF]' },
+};
 
 export function StatusBadge({ status }) {
+  const s = STATUS[status] || STATUS.pending;
   return (
-    <span className={`status-${status} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide`}>
-      {status}
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold ${s.cls}`}>
+      {s.label}
     </span>
   );
 }
 
-export function EmptyState({ icon: Icon, title, description, action }) {
+/* ── Star Rating ── */
+export function StarRating({ rating, size = 'md' }) {
+  const w = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-20 h-20 bg-gold-600/10 rounded-full flex items-center justify-center mb-6">
-        {Icon && <Icon className="w-10 h-10 text-gold-600" />}
-      </div>
-      <h3 className="text-xl font-display font-semibold text-dark-100 mb-2">{title}</h3>
-      {description && <p className="text-dark-400 max-w-xs mb-6">{description}</p>}
-      {action}
+    <div className="flex items-center gap-0.5">
+      {[1,2,3,4,5].map(i => (
+        <Star key={i} className={`${w} ${i <= Math.round(rating) ? 'fill-[#F59E0B] text-[#F59E0B]' : 'text-[#EBEBEB] fill-[#EBEBEB]'}`} />
+      ))}
     </div>
   );
 }
 
-export function GoldButton({ children, onClick, type = 'button', className = '', disabled = false, loading = false }) {
+/* ── GoldButton ── */
+export function GoldButton({ children, onClick, disabled, loading, className = '', type = 'button' }) {
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled || loading}
-      className={`btn-gold py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all ${className}`}
-    >
-      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+    <button type={type} onClick={onClick} disabled={disabled || loading}
+      className={`btn-gold px-6 py-3 rounded-2xl flex items-center gap-2 justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${className}`}>
+      {loading && <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="4" className="opacity-25"/><path fill="white" d="M4 12a8 8 0 018-8v8z"/></svg>}
       {children}
     </button>
   );
 }
 
+/* ── Input ── */
 export function Input({ label, error, className = '', ...props }) {
   return (
     <div className="space-y-1.5">
-      {label && <label className="text-sm font-medium text-dark-200">{label}</label>}
-      <input
-        className={`input-dark w-full px-4 py-3 rounded-xl text-sm ${error ? 'border-red-500/50' : ''} ${className}`}
-        {...props}
-      />
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {label && <label className="block text-xs font-bold uppercase tracking-widest text-[#6B6B6B]">{label}</label>}
+      <input className={`inp ${error ? 'border-red-400' : ''} ${className}`} {...props} />
+      {error && <p className="text-red-500 text-xs font-semibold">{error}</p>}
     </div>
   );
 }
 
-export function Select({ label, error, children, className = '', ...props }) {
+/* ── Empty State ── */
+export function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="space-y-1.5">
-      {label && <label className="text-sm font-medium text-dark-200">{label}</label>}
-      <select
-        className={`input-dark w-full px-4 py-3 rounded-xl text-sm appearance-none cursor-pointer ${className}`}
-        {...props}
-      >
-        {children}
-      </select>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 mx-auto" style={{ background: '#FFF8E1' }}>
+        {Icon ? <Icon className="w-9 h-9 text-[#C9A227]" /> : <Package className="w-9 h-9 text-[#C9A227]" />}
+      </div>
+      <h3 className="text-lg font-black text-[#1C1C1C] mb-2">{title}</h3>
+      {description && <p className="text-[#ABABAB] text-sm mb-6 max-w-xs">{description}</p>}
+      {action}
     </div>
   );
 }
 
+/* ── Modal ── */
 export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   if (!isOpen) return null;
-  const sizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
+  const maxW = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl', xl: 'max-w-5xl' }[size] || 'max-w-lg';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative glass rounded-2xl w-full ${sizes[size]} max-h-[90vh] overflow-y-auto animate-fade-up`}>
-        <div className="flex items-center justify-between p-6 border-b border-gold-600/20">
-          <h2 className="font-display text-xl font-semibold gradient-text">{title}</h2>
-          <button onClick={onClose} className="text-dark-400 hover:text-dark-100 transition-colors">✕</button>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className={`relative bg-white rounded-3xl shadow-2xl w-full ${maxW} max-h-[90vh] overflow-y-auto animate-fade-up`}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EBEBEB] sticky top-0 bg-white rounded-t-3xl z-10">
+          <h2 className="font-black text-base text-[#1C1C1C]">{title}</h2>
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-xl bg-[#F7F5F0] flex items-center justify-center text-[#6B6B6B] hover:bg-[#EBEBEB] transition-colors font-bold text-lg leading-none">
+            ×
+          </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="px-6 py-5">{children}</div>
       </div>
     </div>
   );
 }
 
-export function ProductCard({ product, onAddToCart }) {
+/* ── Select ── */
+export function Select({ value, onChange, children, className = '' }) {
   return (
-    <div className="product-card glass rounded-2xl overflow-hidden group cursor-pointer">
-      <div className="relative overflow-hidden h-56 bg-dark-800">
-        {product.images?.[0] ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl">💡</div>
-        )}
-        {product.discount > 0 && (
-          <span className="absolute top-3 left-3 badge-gold px-2 py-1 rounded-lg">{product.discount}% OFF</span>
-        )}
-        {product.isFeatured && (
-          <span className="absolute top-3 right-3 bg-dark-900/80 text-gold-400 text-xs px-2 py-1 rounded-lg border border-gold-600/30">
-            ★ Featured
-          </span>
-        )}
-      </div>
-      <div className="p-4">
-        <p className="text-xs text-gold-500 uppercase tracking-wider mb-1 font-medium">{product.category}</p>
-        <h3 className="font-display font-semibold text-dark-100 mb-2 line-clamp-1">{product.name}</h3>
-        <StarRating rating={product.rating} count={product.numReviews} />
-        <div className="flex items-center justify-between mt-3">
-          <div>
-            <span className="text-gold-400 font-bold text-lg">₹{product.price.toLocaleString()}</span>
-            {product.originalPrice && (
-              <span className="text-dark-400 text-sm line-through ml-2">₹{product.originalPrice.toLocaleString()}</span>
-            )}
-          </div>
-          {product.stock === 0 && (
-            <span className="text-red-400 text-xs font-medium">Out of Stock</span>
-          )}
-        </div>
-        {onAddToCart && product.stock > 0 && (
-          <button
-            onClick={(e) => { e.preventDefault(); onAddToCart(product); }}
-            className="btn-gold w-full mt-3 py-2.5 rounded-xl text-sm opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            Add to Cart
-          </button>
-        )}
-      </div>
+    <div className={`relative ${className}`}>
+      <select value={value} onChange={onChange}
+        className="inp appearance-none pr-8 font-semibold text-sm cursor-pointer w-full">
+        {children}
+      </select>
+      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
     </div>
   );
 }

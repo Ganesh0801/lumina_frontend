@@ -1,177 +1,282 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, Star, X, ChevronDown, Heart, ShoppingCart } from 'lucide-react';
 import api from '../utils/api';
 import { useCart } from '../context/CartContext';
-import { ProductCard, SkeletonCard, EmptyState, Select } from '../components/UI';
-import { Package } from 'lucide-react';
 
-const CATEGORIES = ['pendant', 'table', 'wall', 'ceiling', 'floor', 'outdoor', 'smart', 'other'];
+const CATEGORIES = ['all','pendant','table','wall','ceiling','floor','outdoor','smart','other'];
 const SORTS = [
-  { value: 'createdAt', label: 'Newest First' },
-  { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
+  { value: 'createdAt', label: 'Newest' },
+  { value: 'price_asc', label: 'Price: Low → High' },
+  { value: 'price_desc', label: 'Price: High → Low' },
   { value: 'rating', label: 'Top Rated' },
   { value: 'popular', label: 'Most Popular' },
 ];
 
+function ProductCard({ product }) {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const [wishlisted, setWishlisted] = useState(false);
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+  return (
+    <div className="product-card bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer"
+      onClick={() => navigate(`/products/${product._id}`)}>
+      <div className="relative bg-[#F7F5F0]" style={{ height: 170 }}>
+        {product.images?.[0]
+          ? <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+          : <div className="w-full h-full flex items-center justify-center text-6xl">💡</div>}
+
+        {discount > 0 && (
+          <span className="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg"
+            style={{ background: 'linear-gradient(135deg,#7a5200,#C9A227)' }}>-{discount}%</span>
+        )}
+        {product.isFeatured && (
+          <span className="absolute top-2 right-8 bg-white text-[#B8860B] text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm">★ Hot</span>
+        )}
+
+        <button
+          onClick={e => { e.stopPropagation(); setWishlisted(w => !w); }}
+          className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-all ${wishlisted ? 'bg-red-500' : 'bg-white'}`}>
+          <Heart className={`w-3 h-3 ${wishlisted ? 'fill-white text-white' : 'text-[#ABABAB]'}`} />
+        </button>
+
+        {product.stock === 0 && (
+          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl">Out of Stock</span>
+          </div>
+        )}
+      </div>
+
+      <div className="p-3">
+        <p className="text-[10px] text-[#ABABAB] capitalize mb-0.5 font-semibold">{product.category}</p>
+        <p className="text-sm font-bold text-[#1C1C1C] line-clamp-1 mb-1">{product.name}</p>
+        <div className="flex items-center gap-1 mb-2">
+          <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
+          <span className="text-[11px] text-[#6B6B6B] font-semibold">{product.rating?.toFixed(1) || '4.5'}</span>
+          {product.numReviews > 0 && <span className="text-[10px] text-[#ABABAB]">({product.numReviews})</span>}
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="font-black text-[#B8860B] text-base">₹{product.price?.toLocaleString()}</span>
+            {product.originalPrice && <span className="text-[#ABABAB] text-xs line-through ml-1">₹{product.originalPrice?.toLocaleString()}</span>}
+          </div>
+          <button
+            onClick={e => { e.stopPropagation(); addToCart(product); }}
+            disabled={product.stock === 0}
+            className="w-7 h-7 rounded-xl flex items-center justify-center text-white shadow-sm disabled:opacity-40 transition-transform active:scale-95"
+            style={{ background: 'linear-gradient(135deg,#7a5200,#C9A227)' }}>
+            <span className="text-lg font-bold leading-none">+</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+      <div className="skeleton" style={{ height: 170 }} />
+      <div className="p-3 space-y-2">
+        <div className="skeleton h-2.5 w-1/3 rounded" />
+        <div className="skeleton h-3 w-full rounded" />
+        <div className="skeleton h-3 w-2/3 rounded" />
+        <div className="skeleton h-4 w-1/2 rounded" />
+      </div>
+    </div>
+  );
+}
+
 export default function Products() {
-  const [params, setParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const { addToCart } = useCart();
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const [filters, setFilters] = useState({
-    search: params.get('search') || '',
-    category: params.get('category') || '',
-    sort: params.get('sort') || '',
-    minPrice: params.get('minPrice') || '',
-    maxPrice: params.get('maxPrice') || '',
-    page: parseInt(params.get('page')) || 1,
-  });
-
-  const setFilter = (k, v) => setFilters(p => ({ ...p, [k]: v, page: 1 }));
+  const category = searchParams.get('category') || 'all';
+  const search = searchParams.get('search') || '';
+  const sort = searchParams.get('sort') || 'createdAt';
+  const [searchInput, setSearchInput] = useState(search);
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const q = new URLSearchParams();
-      Object.entries(filters).forEach(([k, v]) => { if (v) q.set(k, v); });
+      const q = new URLSearchParams({ page, limit: 12, sort });
+      if (category && category !== 'all') q.set('category', category);
+      if (search) q.set('search', search);
+      if (priceRange.min) q.set('minPrice', priceRange.min);
+      if (priceRange.max) q.set('maxPrice', priceRange.max);
       const { data } = await api.get(`/products?${q}`);
       setProducts(data.products);
       setTotal(data.total);
       setPages(data.pages);
-    } catch { }
+    } catch {}
     setLoading(false);
-  }, [filters]);
+  }, [page, category, search, sort, priceRange]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => { setPage(1); }, [category, search, sort]);
+
+  const setParam = (key, val) => {
+    const p = new URLSearchParams(searchParams);
+    if (val && val !== 'all') p.set(key, val); else p.delete(key);
+    setSearchParams(p);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setParam('search', searchInput);
+  };
+
+  const clearFilters = () => {
+    setSearchParams({});
+    setSearchInput('');
+    setPriceRange({ min: '', max: '' });
+  };
+
+  const hasFilters = category !== 'all' || search || priceRange.min || priceRange.max;
 
   return (
-    <div className="min-h-screen pt-20">
-      {/* Header */}
-      <div className="bg-dark-800/50 border-b border-gold-600/10 py-10 px-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="font-display text-4xl font-bold text-dark-50 mb-2">
-            {filters.category ? `${filters.category.charAt(0).toUpperCase() + filters.category.slice(1)} Lights` : 'All Products'}
-          </h1>
-          <p className="text-dark-400">{total} products found</p>
-        </div>
-      </div>
+    <div className="min-h-screen pb-24 lg:pb-8" style={{ background: '#F7F5F0' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Search & Sort Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
-            <input
-              type="text"
-              placeholder="Search lights, lamps..."
-              value={filters.search}
-              onChange={e => setFilter('search', e.target.value)}
-              className="input-dark w-full pl-11 pr-4 py-3 rounded-xl"
-            />
-          </div>
-          <Select value={filters.sort} onChange={e => setFilter('sort', e.target.value)} className="sm:w-48">
-            <option value="">Sort by</option>
-            {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-          </Select>
+        {/* ── PAGE HEADER ── */}
+        <div className="py-5">
+          <h1 className="text-xl font-black text-[#1C1C1C] mb-1">
+            {search ? `Results for "${search}"` : category !== 'all' ? `${category.charAt(0).toUpperCase()+category.slice(1)} Lights` : 'All Products'}
+          </h1>
+          <p className="text-sm text-[#ABABAB] font-semibold">{total} products found</p>
+        </div>
+
+        {/* ── SEARCH + FILTER BAR ── */}
+        <div className="flex gap-2 mb-4">
+          <form onSubmit={handleSearch} className="flex-1">
+            <div className="relative w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB] pointer-events-none" />
+              <input
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                placeholder="Search here…"
+                className="inp w-full py-3 font-semibold"
+                style={{ borderRadius: 16, paddingLeft: '2.5rem' }}
+              />
+            </div>
+          </form>
           <button
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl border transition-all ${filtersOpen ? 'bg-gold-500/10 border-gold-500/30 text-gold-400' : 'glass text-dark-300 hover:border-gold-500/30'}`}
-          >
-            <SlidersHorizontal className="w-4 h-4" /> Filters
+            onClick={() => setFilterOpen(o => !o)}
+            className={`flex items-center gap-1.5 px-4 py-3 rounded-2xl font-bold text-sm border transition-all ${filterOpen ? 'text-white border-transparent' : 'bg-white text-[#6B6B6B] border-[#EBEBEB]'}`}
+            style={filterOpen ? { background: 'linear-gradient(135deg,#7a5200,#C9A227)' } : {}}>
+            <SlidersHorizontal className="w-4 h-4" />
+            <span className="hidden sm:inline">Filter</span>
           </button>
         </div>
 
-        {/* Filters Panel */}
-        {filtersOpen && (
-          <div className="glass rounded-2xl p-6 mb-8 animate-fade-in">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* ── CATEGORY PILLS ── */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4" style={{ scrollbarWidth: 'none' }}>
+          {CATEGORIES.map(c => (
+            <button key={c} onClick={() => setParam('category', c)}
+              className={`flex-shrink-0 px-4 py-2 rounded-2xl text-xs font-bold capitalize border transition-all ${category === c ? 'text-white border-transparent shadow-md' : 'bg-white text-[#6B6B6B] border-[#EBEBEB] hover:border-[#C9A227]'}`}
+              style={category === c ? { background: 'linear-gradient(135deg,#7a5200,#C9A227)' } : {}}>
+              {c === 'all' ? 'All' : c}
+            </button>
+          ))}
+        </div>
+
+        {/* ── FILTER PANEL ── */}
+        {filterOpen && (
+          <div className="bg-white rounded-2xl p-5 mb-5 shadow-sm animate-fade-in">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Sort */}
               <div>
-                <p className="text-sm font-medium text-dark-200 mb-3">Category</p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setFilter('category', '')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${!filters.category ? 'bg-gold-gradient text-white' : 'glass text-dark-300 hover:border-gold-500/30'}`}
-                  >All</button>
-                  {CATEGORIES.map(cat => (
-                    <button
-                      key={cat}
-                      onClick={() => setFilter('category', cat)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${filters.category === cat ? 'bg-gold-gradient text-white' : 'glass text-dark-300 hover:border-gold-500/30'}`}
-                    >{cat}</button>
-                  ))}
+                <p className="text-xs font-bold text-[#6B6B6B] uppercase tracking-widest mb-2">Sort By</p>
+                <div className="relative">
+                  <select value={sort} onChange={e => setParam('sort', e.target.value)}
+                    className="inp appearance-none pr-8 py-2.5 text-sm font-semibold">
+                    {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB] pointer-events-none" />
                 </div>
               </div>
+              {/* Price Min */}
               <div>
-                <p className="text-sm font-medium text-dark-200 mb-3">Price Range (₹)</p>
-                <div className="flex gap-3">
-                  <input type="number" placeholder="Min" value={filters.minPrice}
-                    onChange={e => setFilter('minPrice', e.target.value)}
-                    className="input-dark w-full px-3 py-2 rounded-lg text-sm" />
-                  <input type="number" placeholder="Max" value={filters.maxPrice}
-                    onChange={e => setFilter('maxPrice', e.target.value)}
-                    className="input-dark w-full px-3 py-2 rounded-lg text-sm" />
-                </div>
+                <p className="text-xs font-bold text-[#6B6B6B] uppercase tracking-widest mb-2">Min Price</p>
+                <input type="number" placeholder="₹ 0" value={priceRange.min}
+                  onChange={e => setPriceRange(p => ({ ...p, min: e.target.value }))}
+                  className="inp py-2.5 text-sm font-semibold" />
               </div>
-              <div className="flex items-end">
-                <button
-                  onClick={() => setFilters({ search: '', category: '', sort: '', minPrice: '', maxPrice: '', page: 1 })}
-                  className="flex items-center gap-2 text-sm text-dark-400 hover:text-red-400 transition-colors"
-                >
-                  <X className="w-4 h-4" /> Clear Filters
+              {/* Price Max */}
+              <div>
+                <p className="text-xs font-bold text-[#6B6B6B] uppercase tracking-widest mb-2">Max Price</p>
+                <input type="number" placeholder="₹ 99999" value={priceRange.max}
+                  onChange={e => setPriceRange(p => ({ ...p, max: e.target.value }))}
+                  className="inp py-2.5 text-sm font-semibold" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={fetchProducts}
+                className="btn-gold flex-1 py-2.5 rounded-xl text-sm">Apply Filters</button>
+              {hasFilters && (
+                <button onClick={clearFilters}
+                  className="flex items-center gap-1 px-4 py-2.5 rounded-xl bg-red-50 text-red-500 text-sm font-bold border border-red-100">
+                  <X className="w-4 h-4" /> Clear
                 </button>
-              </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Products Grid */}
+        {/* ── ACTIVE FILTERS ── */}
+        {hasFilters && !filterOpen && (
+          <div className="flex gap-2 flex-wrap mb-4">
+            {search && <span className="flex items-center gap-1 bg-[#FFF8E1] text-[#B8860B] text-xs font-bold px-3 py-1.5 rounded-xl border border-[#F5E0A0]">"{search}" <button onClick={() => { setParam('search',''); setSearchInput(''); }}><X className="w-3 h-3" /></button></span>}
+            {category !== 'all' && <span className="flex items-center gap-1 bg-[#FFF8E1] text-[#B8860B] text-xs font-bold px-3 py-1.5 rounded-xl border border-[#F5E0A0] capitalize">{category} <button onClick={() => setParam('category','')}><X className="w-3 h-3" /></button></span>}
+            {(priceRange.min || priceRange.max) && <span className="flex items-center gap-1 bg-[#FFF8E1] text-[#B8860B] text-xs font-bold px-3 py-1.5 rounded-xl border border-[#F5E0A0]">₹{priceRange.min||0}–{priceRange.max||'∞'} <button onClick={() => setPriceRange({min:'',max:''})}><X className="w-3 h-3" /></button></span>}
+          </div>
+        )}
+
+        {/* ── GRID ── */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : products.length === 0 ? (
-          <EmptyState icon={Package} title="No Products Found" description="Try adjusting your filters or search terms" />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="text-7xl mb-5">💡</div>
+            <h3 className="text-lg font-black text-[#1C1C1C] mb-2">No products found</h3>
+            <p className="text-[#ABABAB] text-sm mb-6">{search ? `No results for "${search}"` : 'Try a different category or filter'}</p>
+            <button onClick={clearFilters} className="btn-gold px-6 py-3 rounded-xl text-sm">Clear Filters</button>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map(p => (
-              <Link key={p._id} to={`/products/${p._id}`}>
-                <ProductCard product={p} onAddToCart={addToCart} />
-              </Link>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {products.map((p, i) => (
+              <div key={p._id} className="animate-fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
+                <ProductCard product={p} />
+              </div>
             ))}
           </div>
         )}
 
-        {/* Pagination */}
+        {/* ── PAGINATION ── */}
         {pages > 1 && (
-          <div className="flex justify-center items-center gap-3 mt-12">
-            <button
-              onClick={() => setFilter('page', filters.page - 1)}
-              disabled={filters.page === 1}
-              className="glass p-2 rounded-lg disabled:opacity-30 hover:border-gold-500/30 transition-all"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
-              <button key={p} onClick={() => setFilter('page', p)}
-                className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${filters.page === p ? 'bg-gold-gradient text-white' : 'glass text-dark-300 hover:border-gold-500/30'}`}>
-                {p}
-              </button>
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1}
+              className="w-10 h-10 rounded-xl bg-white text-[#6B6B6B] font-bold shadow-sm disabled:opacity-40 hover:shadow-md transition-all">‹</button>
+            {Array.from({ length: Math.min(pages,7) }, (_,i) => i+1).map(p => (
+              <button key={p} onClick={() => setPage(p)}
+                className={`w-10 h-10 rounded-xl font-bold text-sm shadow-sm transition-all ${page===p ? 'text-white shadow-md' : 'bg-white text-[#6B6B6B] hover:shadow-md'}`}
+                style={page===p ? {background:'linear-gradient(135deg,#7a5200,#C9A227)'} : {}}>{p}</button>
             ))}
-            <button
-              onClick={() => setFilter('page', filters.page + 1)}
-              disabled={filters.page === pages}
-              className="glass p-2 rounded-lg disabled:opacity-30 hover:border-gold-500/30 transition-all"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <button onClick={() => setPage(p => Math.min(pages, p+1))} disabled={page===pages}
+              className="w-10 h-10 rounded-xl bg-white text-[#6B6B6B] font-bold shadow-sm disabled:opacity-40 hover:shadow-md transition-all">›</button>
           </div>
         )}
+
       </div>
     </div>
   );
