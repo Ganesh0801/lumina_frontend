@@ -14,6 +14,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, quantity = 1, color = '') => {
     setCart(prev => {
+      // Use product._id as the unique key
       const existing = prev.find(i => i.product === product._id && i.color === color);
       if (existing) {
         toast.success('Quantity updated!');
@@ -25,23 +26,25 @@ export const CartProvider = ({ children }) => {
       }
       toast.success(`${product.name} added to cart!`);
       return [...prev, {
-        product: product._id,
+        product: product._id,       // unique id
         name: product.name,
         price: product.price,
-        image: product.images?.[0] || '',
+        image: product.images?.[0] || '', // single string — consistent field name
+        category: product.category || '',
         quantity,
         color,
-        stock: product.stock
+        stock: product.stock,
       }];
     });
   };
 
-  const removeFromCart = (productId, color) => {
+  // All cart operations use product + color as the key
+  const removeFromCart = (productId, color = '') => {
     setCart(prev => prev.filter(i => !(i.product === productId && i.color === color)));
   };
 
-  const updateQuantity = (productId, color, quantity) => {
-    if (quantity < 1) return removeFromCart(productId, color);
+  const updateQuantity = (productId, color = '', quantity) => {
+    if (quantity < 1) { removeFromCart(productId, color); return; }
     setCart(prev => prev.map(i =>
       i.product === productId && i.color === color ? { ...i, quantity } : i
     ));

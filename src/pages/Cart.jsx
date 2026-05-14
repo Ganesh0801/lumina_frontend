@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ChevronLeft, Tag } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, ChevronLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export default function Cart() {
@@ -30,7 +30,7 @@ export default function Cart() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-[#1C1C1C]">Add to Cart</h1>
+            <h1 className="text-xl font-black text-[#1C1C1C]">My Cart</h1>
             <p className="text-xs text-[#ABABAB] font-semibold">{cartCount} Product{cartCount !== 1 ? 's' : ''}</p>
           </div>
         </div>
@@ -40,37 +40,44 @@ export default function Cart() {
           {/* ── ITEMS ── */}
           <div className="lg:col-span-2 space-y-3 mb-5 lg:mb-0">
             {cart.map((item, i) => (
-              <div key={item._id} className="bg-white rounded-2xl p-4 flex gap-4 shadow-sm animate-fade-up"
+              <div key={`${item.product}-${item.color}`}
+                className="bg-white rounded-2xl p-4 flex gap-4 shadow-sm animate-fade-up"
                 style={{ animationDelay: `${i * 0.06}s` }}>
-                {/* Image */}
+
+                {/* ✅ FIX: use item.image (single string saved by CartContext) */}
                 <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F7F5F0] flex-shrink-0">
-                  {item.images?.[0]
-                    ? <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-3xl">💡</div>}
+                  {item.image
+                    ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+                    : null}
+                  <div className={`w-full h-full items-center justify-center text-3xl ${item.image ? 'hidden' : 'flex'}`}>💡</div>
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-[#ABABAB] capitalize font-semibold mb-0.5">{item.category}</p>
-                  <p className="font-bold text-sm text-[#1C1C1C] line-clamp-1 mb-1">{item.name}</p>
+                  {item.category && <p className="text-[10px] text-[#ABABAB] capitalize font-semibold mb-0.5">{item.category}</p>}
+                  <p className="font-bold text-sm text-[#1C1C1C] line-clamp-1 mb-0.5">{item.name}</p>
+                  {item.color && <p className="text-[11px] text-[#6B6B6B] mb-1 capitalize">Color: {item.color}</p>}
                   <p className="font-black text-[#B8860B] text-base">₹{item.price?.toLocaleString()}</p>
 
                   <div className="flex items-center justify-between mt-2">
-                    {/* Qty control */}
+                    {/* ✅ FIX: pass product + color to updateQuantity */}
                     <div className="flex items-center bg-[#F7F5F0] rounded-xl overflow-hidden">
-                      <button onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                      <button
+                        onClick={() => updateQuantity(item.product, item.color, item.quantity - 1)}
                         className="w-8 h-8 flex items-center justify-center text-[#6B6B6B] hover:text-[#B8860B] transition-colors">
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="w-8 h-8 flex items-center justify-center font-black text-sm text-[#1C1C1C]">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                      <button
+                        onClick={() => updateQuantity(item.product, item.color, item.quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center text-[#6B6B6B] hover:text-[#B8860B] transition-colors">
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
-                    {/* Remove */}
-                    <button onClick={() => removeFromCart(item._id)}
+                    {/* ✅ FIX: pass product + color to removeFromCart */}
+                    <button
+                      onClick={() => removeFromCart(item.product, item.color)}
                       className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center text-red-400 hover:bg-red-100 transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -84,7 +91,6 @@ export default function Cart() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl p-5 shadow-sm">
               <h2 className="font-black text-base text-[#1C1C1C] mb-4">Order Summary</h2>
-
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B6B6B] font-semibold">Sub total:</span>
@@ -106,13 +112,11 @@ export default function Cart() {
                   <span className="font-black text-xl gradient-text">₹{total.toLocaleString()}</span>
                 </div>
               </div>
-
               <button onClick={() => navigate('/checkout')}
                 className="btn-gold w-full py-4 rounded-2xl font-bold text-base mb-3 flex items-center justify-center gap-2">
                 Check Out <ArrowRight className="w-4 h-4" />
               </button>
-              <Link to="/products"
-                className="block text-center text-sm font-bold text-[#6B6B6B] hover:text-[#B8860B] transition-colors py-2">
+              <Link to="/products" className="block text-center text-sm font-bold text-[#6B6B6B] hover:text-[#B8860B] transition-colors py-2">
                 ← Continue Shopping
               </Link>
             </div>

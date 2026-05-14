@@ -68,9 +68,9 @@ export default function Login() {
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B] mb-1.5 block">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB]" />
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB]" />
                 <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
-                  placeholder="you@example.com" className="inp pl-11 py-3.5 text-sm font-semibold" />
+                  placeholder="you@example.com" className="inp pl-20 py-3.5 text-sm font-semibold" />
               </div>
             </div>
 
@@ -97,15 +97,15 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-4 flex items-center gap-3">
+          {/* <div className="mt-4 flex items-center gap-3">
             <div className="flex-1 h-px bg-[#EBEBEB]" />
             <span className="text-xs text-[#ABABAB] font-semibold">OR</span>
             <div className="flex-1 h-px bg-[#EBEBEB]" />
-          </div>
+          </div> */}
 
-          <button className="w-full mt-4 bg-white border border-[#EBEBEB] rounded-2xl py-3.5 flex items-center justify-center gap-3 font-bold text-sm text-[#6B6B6B] hover:shadow-md transition-all">
+          {/* <button className="w-full mt-4 bg-white border border-[#EBEBEB] rounded-2xl py-3.5 flex items-center justify-center gap-3 font-bold text-sm text-[#6B6B6B] hover:shadow-md transition-all">
             <span className="text-xl">🔷</span> Continue with Google
-          </button>
+          </button> */}
 
           <p className="text-center mt-6 text-sm text-[#6B6B6B] font-semibold">
             Don't have an account?{' '}

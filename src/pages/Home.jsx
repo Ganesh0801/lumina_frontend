@@ -23,7 +23,7 @@ function ProductCard({ product, onAddToCart }) {
       onClick={() => navigate(`/products/${product._id}`)}>
       <div className="relative bg-[#F7F5F0]" style={{ height: 140 }}>
         {product.images?.[0]
-          ? <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+          ? <img src={product.images[0]?.startsWith('http') ? product.images[0] : `${(process.env.REACT_APP_API_URL||'http://localhost:5000/api').replace('/api','')}${product.images[0]}`} alt={product.name} className="w-full h-full object-cover" />
           : <div className="w-full h-full flex items-center justify-center text-5xl">💡</div>}
         {discount > 0 && (
           <span className="absolute top-2 left-2 bg-[#C9A227] text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">-{discount}%</span>

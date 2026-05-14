@@ -64,10 +64,13 @@ export default function Orders() {
                   style={{ animationDelay: `${i * 0.06}s` }}>
 
                   {/* Product image */}
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#F7F5F0] flex-shrink-0">
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#F7F5F0] flex-shrink-0 relative">
                     {order.items[0]?.image
-                      ? <img src={order.items[0].image} alt="" className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-3xl">💡</div>}
+                      ? <img src={order.items[0].image} alt="" className="w-full h-full object-cover"
+                          onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+                      : null}
+                    <div className="w-full h-full items-center justify-center text-3xl"
+                      style={{ display: order.items[0]?.image ? 'none' : 'flex' }}>💡</div>
                   </div>
 
                   {/* Info */}
