@@ -170,7 +170,7 @@ export default function Products() {
 
         {/* Search + Filter */}
         <div className="flex gap-2 mb-4">
-          <form onSubmit={handleSearch} className="flex-1">
+          {/* <form onSubmit={handleSearch} className="flex-1">
             <div className="relative w-full">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB] pointer-events-none" />
               <input
@@ -178,10 +178,21 @@ export default function Products() {
                 onChange={e => setSearchInput(e.target.value)}
                 placeholder="Search here…"
                 className="inp w-full py-3 font-semibold"
-                style={{ borderRadius: 16, paddingLeft: '2.25rem' }}
+                
               />
             </div>
-          </form>
+          </form> */}
+          <form onSubmit={handleSearch} className="flex-1">
+          <div className="relative w-full flex items-center"> {/* Added flex items-center */}
+            <Search className="absolute left-3.5 w-4 h-4 text-[#ABABAB] pointer-events-none" />
+            <input
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              placeholder="Search here…"
+              className="w-full py-3 pl-10 pr-4 font-semibold rounded-lg border focus:outline-none" 
+            />
+          </div>
+        </form>
           <button
             onClick={() => setFilterOpen(o => !o)}
             className={`flex items-center gap-1.5 px-4 py-3 rounded-2xl font-bold text-sm border transition-all

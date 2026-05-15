@@ -14,7 +14,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) return toast.error('Fill all fields');
+    if (!form.email || !form.password) return toast.error('Please fill all fields');
     setLoading(true);
     try {
       const data = await login(form.email, form.password);
@@ -28,89 +28,102 @@ export default function Login() {
   return (
     <div className="min-h-screen flex" style={{ background: '#F7F5F0' }}>
 
-      {/* ── LEFT DECORATIVE (desktop only) ── */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden"
-        style={{ background: 'linear-gradient(160deg,#FFF8E1,#F0E5C0)' }}>
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #C9A227 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden"
+        style={{ background: 'linear-gradient(160deg,#FFF8E1 0%,#F0E5C0 100%)' }}>
+        <div className="absolute inset-0"
+          style={{ backgroundImage: 'radial-gradient(circle,#C9A22718 1px,transparent 1px)', backgroundSize: '36px 36px' }} />
         <div className="relative z-10 text-center px-12">
-          <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg animate-float"
+          <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl animate-float"
             style={{ background: 'linear-gradient(135deg,#7a5200,#C9A227)' }}>
             <Zap className="w-12 h-12 text-white" fill="white" />
           </div>
-          <h1 className="text-6xl font-black gradient-text mb-3" style={{ fontFamily: 'Nunito' }}>LUMINA</h1>
-          <p className="text-[#7a5200] text-lg font-semibold mb-12">Illuminate Your World</p>
-          <div className="grid grid-cols-3 gap-4">
+          <h1 className="text-6xl font-black gradient-text mb-3">LUMINA</h1>
+          <p className="text-[#7a5200] text-lg font-bold mb-12">Illuminate Your World</p>
+          <div className="grid grid-cols-3 gap-3">
             {['💡','🏮','✨','🕯️','⚡','🌟'].map((e, i) => (
-              <div key={i} className="text-4xl bg-white/60 rounded-2xl p-4 flex items-center justify-center shadow-sm animate-float"
-                style={{ animationDelay: `${i * 0.3}s` }}>{e}</div>
+              <div key={i} className="text-3xl bg-white/70 rounded-2xl p-4 flex items-center justify-center shadow-sm animate-float"
+                style={{ animationDelay: `${i * 0.25}s` }}>{e}</div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── RIGHT: FORM ── */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md animate-fade-up">
+      {/* Right form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-16">
+        <div className="w-full max-w-[400px] animate-fade-up">
 
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2 mb-10">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#7a5200,#C9A227)' }}>
+          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+              style={{ background: 'linear-gradient(135deg,#7a5200,#C9A227)' }}>
               <Zap className="w-5 h-5 text-white" fill="white" />
             </div>
-            <span className="font-black text-xl gradient-text tracking-widest">LUMINA</span>
+            <span className="font-black text-2xl gradient-text tracking-widest">LUMINA</span>
           </div>
 
-          <h2 className="text-3xl font-black text-[#1C1C1C] mb-1">Welcome Back</h2>
+          <h2 className="text-3xl font-black text-[#1C1C1C] mb-1 leading-tight">Welcome Back</h2>
           <p className="text-[#ABABAB] font-semibold text-sm mb-8">Sign in to your Lumina account</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B] mb-1.5 block">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB]" />
-                <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
-                  placeholder="you@example.com" className="inp pl-20 py-3.5 text-sm font-semibold" />
+              <label className="block text-xs font-bold uppercase tracking-widest text-[#6B6B6B] mb-2">Email Address</label>
+              <div className="inp-wrap">
+                <Mail className="inp-icon" />
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={e => set('email', e.target.value)}
+                  placeholder="you@example.com"
+                  className="inp"
+                  autoComplete="email"
+                />
               </div>
             </div>
 
+            {/* Password */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B] mb-1.5 block">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB]" />
-                <input type={showPass ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)}
-                  placeholder="Your password" className="inp pl-11 pr-11 py-3.5 text-sm font-semibold" />
-                <button type="button" onClick={() => setShowPass(s => !s)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#ABABAB] hover:text-[#B8860B] transition-colors">
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <label className="block text-xs font-bold uppercase tracking-widest text-[#6B6B6B] mb-2">Password</label>
+              <div className="inp-wrap">
+                <Lock className="inp-icon" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={e => set('password', e.target.value)}
+                  placeholder="Your password"
+                  className="inp"
+                  style={{ paddingRight: 44 }}
+                  autoComplete="current-password"
+                />
+                <button type="button" className="inp-icon-right" onClick={() => setShowPass(s => !s)}>
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-xs font-bold text-[#B8860B] hover:underline">Forgot Password?</Link>
+            <div className="flex justify-end -mt-1">
+              <Link to="/forgot-password" className="text-xs font-bold text-[#B8860B] hover:underline underline-offset-2">
+                Forgot Password?
+              </Link>
             </div>
 
             <button type="submit" disabled={loading}
-              className="btn-gold w-full py-4 rounded-2xl font-bold text-base mt-2 flex items-center justify-center gap-2">
-              {loading ? <><svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="4" className="opacity-25"/><path fill="white" d="M4 12a8 8 0 018-8v8z"/></svg>Signing in…</> : 'Sign In'}
+              className="btn-gold w-full h-12 rounded-2xl font-bold text-sm mt-1 gap-2">
+              {loading ? <><span className="spinner" /> Signing in…</> : 'Sign In'}
             </button>
           </form>
 
-          {/* <div className="mt-4 flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#EBEBEB]" />
-            <span className="text-xs text-[#ABABAB] font-semibold">OR</span>
-            <div className="flex-1 h-px bg-[#EBEBEB]" />
-          </div> */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-[#E8E4DC]" />
+            <span className="text-xs text-[#ABABAB] font-semibold">New to Lumina?</span>
+            <div className="flex-1 h-px bg-[#E8E4DC]" />
+          </div>
 
-          {/* <button className="w-full mt-4 bg-white border border-[#EBEBEB] rounded-2xl py-3.5 flex items-center justify-center gap-3 font-bold text-sm text-[#6B6B6B] hover:shadow-md transition-all">
-            <span className="text-xl">🔷</span> Continue with Google
-          </button> */}
-
-          <p className="text-center mt-6 text-sm text-[#6B6B6B] font-semibold">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-[#B8860B] font-black hover:underline">Create Account</Link>
-          </p>
+          <Link to="/register"
+            className="block w-full h-12 rounded-2xl border-2 border-[#C9A227] text-[#B8860B] font-bold text-sm text-center leading-[44px] hover:bg-[#FFF8E1] transition-colors">
+            Create Account
+          </Link>
         </div>
       </div>
     </div>

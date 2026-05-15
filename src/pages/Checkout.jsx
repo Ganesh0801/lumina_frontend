@@ -154,10 +154,10 @@ export default function Checkout() {
                   ].map(({ k, label, icon: Icon, placeholder, type }) => (
                     <div key={k}>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-[#ABABAB] mb-1.5 block">{label}</label>
-                      <div className="relative">
-                        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB]" />
+                      <div className="inp-wrap">
+                        <Icon className="inp-icon" />
                         <input type={type} value={form[k]} onChange={e => setF(k, e.target.value)}
-                          placeholder={placeholder} className="inp pl-10 py-3 text-sm font-semibold w-full" />
+                          placeholder={placeholder} className="inp" />
                       </div>
                     </div>
                   ))}
@@ -178,7 +178,7 @@ export default function Checkout() {
                     <div key={k}>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-[#ABABAB] mb-1.5 block">{label}</label>
                       <input value={form[k]} onChange={e => setF(k, e.target.value)}
-                        placeholder={placeholder} className="inp py-3 text-sm font-semibold w-full" />
+                        placeholder={placeholder} className="inp" />
                     </div>
                   ))}
                 </div>
@@ -224,19 +224,19 @@ export default function Checkout() {
                         value={form.cardNumber}
                         onChange={e => setF('cardNumber', e.target.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().slice(0,19))}
                         placeholder="5068 4649 7909 5679" maxLength={19}
-                        className="inp py-3 text-sm font-semibold tracking-widest w-full" />
+                        className="inp" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-[#ABABAB] mb-1.5 block">Expire Date</label>
                         <input value={form.expiry} onChange={e => setF('expiry', e.target.value)}
-                          placeholder="MM/YY" className="inp py-3 text-sm font-semibold w-full" />
+                          placeholder="MM/YY" className="inp" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-[#ABABAB] mb-1.5 block">CVC</label>
                         <input value={form.cvv} onChange={e => setF('cvv', e.target.value)}
                           maxLength={3} placeholder="567" type="password"
-                          className="inp py-3 text-sm font-semibold w-full" />
+                          className="inp" />
                       </div>
                     </div>
                     <div className="flex items-center justify-between py-1">

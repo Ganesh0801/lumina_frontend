@@ -176,15 +176,17 @@ export default function Navbar() {
           {/* Search Bar */}
           {searchOpen && (
             <div className="pb-3 animate-fade-in">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ABABAB] pointer-events-none" />
-                <input
-                  autoFocus
-                  value={searchQ}
-                  onChange={e => setSearchQ(e.target.value)}
-                  placeholder="Search lights, lamps, pendants…"
-                  className="inp pl-11 pr-4 py-3 w-full"
-                />
+              <form onSubmit={handleSearch}>
+                <div className="inp-wrap">
+                  <Search className="inp-icon" />
+                  <input
+                    autoFocus
+                    value={searchQ}
+                    onChange={e => setSearchQ(e.target.value)}
+                    placeholder="Search lights, lamps, pendants…"
+                    className="inp"
+                  />
+                </div>
               </form>
             </div>
           )}

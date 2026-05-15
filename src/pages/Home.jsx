@@ -101,7 +101,7 @@ export default function Home() {
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full shadow-sm mb-5">
                 <span className="notify-dot" />
-                <span className="text-xs font-bold text-[#B8860B]">New Collection 2024</span>
+                <span className="text-xs font-bold text-[#B8860B]">New Collection {new Date().getFullYear()}</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-black text-[#1C1C1C] leading-tight mb-4" style={{ fontFamily: 'Nunito' }}>
                 Make Your Room<br /><span className="gradient-text">Bright & Beautiful</span>
@@ -149,7 +149,7 @@ export default function Home() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ABABAB]" />
             <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
               placeholder="Search here…"
-              className="inp pl-12 pr-4 py-4 w-full text-base font-semibold"
+              className="inp"
               style={{ borderRadius: 18 }} />
           </form>
         </div>
