@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, ChevronLeft, ChevronRight, MapPin, Phone, Mail, Calendar } from 'lucide-react';
 import api from '../../utils/api';
 import AdminLayout from '../../components/AdminLayout';
-import { LoadingSpinner, Modal, StatusBadge } from '../../components/UI';
+import { LoadingSpinner, StatusBadge } from '../../components/UI';
 
 const card = { background:'#1C1910', border:'1px solid rgba(201,162,39,0.10)', borderRadius:16 };
 
@@ -161,109 +161,90 @@ export default function AdminUsers() {
       )}
 
       {/* ── User Detail Modal ── */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Customer Details" size="md">
-        {detLoading ? <LoadingSpinner text="Loading details…" /> : detail && (() => {
-          const u = detail.user || {};
-          const orders = detail.orders || [];
-          const totalSpent = orders.filter(o=>o.status==='delivered').reduce((s,o)=>s+o.total,0);
-          return (
-            <div className="space-y-4">
-              {/* Avatar + name */}
-              <div className="flex items-center gap-4 p-4 rounded-2xl" style={{ background:'#F7F5F0' }}>
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl flex-shrink-0"
-                  style={{ background:'linear-gradient(135deg,#7a5200,#C9A227)' }}>
-                  {u.name?.charAt(0)?.toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-black text-base text-[#1C1C1C] truncate">{u.name}</p>
-                  <p className="text-sm text-[#6B6B6B] truncate">{u.email}</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase text-white"
-                    style={{ background:'linear-gradient(135deg,#7a5200,#C9A227)' }}>{u.role}</span>
-                </div>
-              </div>
-
-              {/* Contact info */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl flex items-center gap-2" style={{ background:'#F7F5F0' }}>
-                  <Phone size={14} className="text-[#B8860B] flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[10px] text-[#ABABAB] font-bold uppercase tracking-wider">Phone</p>
-                    <p className="text-xs font-bold text-[#1C1C1C] truncate">{u.phone||'—'}</p>
-                  </div>
-                </div>
-                <div className="p-3 rounded-xl flex items-center gap-2" style={{ background:'#F7F5F0' }}>
-                  <Calendar size={14} className="text-[#B8860B] flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[10px] text-[#ABABAB] font-bold uppercase tracking-wider">Joined</p>
-                    <p className="text-xs font-bold text-[#1C1C1C]">
-                      {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label:'Total Orders', value: orders.length },
-                  { label:'Delivered',    value: orders.filter(o=>o.status==='delivered').length },
-                  { label:'Total Spent',  value: `₹${totalSpent.toLocaleString()}` },
-                ].map(({ label, value }) => (
-                  <div key={label} className="p-3 rounded-xl text-center" style={{ background:'#F7F5F0' }}>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#ABABAB] mb-1">{label}</p>
-                    <p className="font-black text-sm text-[#B8860B]">{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* ✅ FIX: Show full address — city, state, pincode, country */}
-              <div className="p-4 rounded-xl" style={{ background:'#F7F5F0' }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin size={14} className="text-[#B8860B]" />
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#ABABAB]">Delivery Address</p>
-                </div>
-                {u.address && (u.address.city || u.address.street) ? (
-                  <div className="space-y-0.5 ml-5">
-                    {u.address.street  && <p className="text-sm font-semibold text-[#1C1C1C]">{u.address.street}</p>}
-                    <p className="text-xs text-[#6B6B6B]">
-                      {[u.address.city, u.address.state, u.address.pincode].filter(Boolean).join(', ')}
-                    </p>
-                    {u.address.country && <p className="text-xs text-[#6B6B6B]">{u.address.country}</p>}
-                  </div>
-                ) : (
-                  <p className="text-xs text-[#ABABAB] ml-5">No address saved</p>
-                )}
-              </div>
-
-              {/* Recent orders */}
-              {orders.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B] mb-3">Order History ({orders.length})</p>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {orders.slice(0,10).map(o => (
-                      <div key={o._id} className="flex items-center justify-between p-3 rounded-xl" style={{ background:'#F7F5F0' }}>
-                        <div>
-                          <p className="text-xs font-bold text-[#B8860B]">{o.orderNumber}</p>
-                          <p className="text-xs text-[#ABABAB]">{o.items?.length} item{o.items?.length!==1?'s':''} · {new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</p>
+            {/* Dark Customer Modal */}
+      {modalOpen && (
+        <div style={{ position:'fixed', inset:0, zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.75)', backdropFilter:'blur(3px)' }} onClick={() => setModalOpen(false)} />
+          <div style={{
+            position:'relative', background:'#171410', border:'1px solid rgba(201,162,39,0.15)',
+            borderRadius:20, width:'100%', maxWidth:520, maxHeight:'90vh',
+            overflowY:'auto', boxShadow:'0 24px 80px rgba(0,0,0,0.7)',
+          }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom:'1px solid rgba(201,162,39,0.08)', position:'sticky', top:0, background:'#171410', zIndex:10, borderRadius:'20px 20px 0 0' }}>
+              <p style={{ color:'#E8D8A0', fontWeight:900, fontSize:14 }}>Customer Details</p>
+              <button onClick={() => setModalOpen(false)} style={{ background:'rgba(201,162,39,0.08)', border:'1px solid rgba(201,162,39,0.15)', borderRadius:8, cursor:'pointer', color:'#C9A227', padding:6, display:'flex' }}>✕</button>
+            </div>
+            <div style={{ padding:18 }}>
+              {detLoading ? (
+                <LoadingSpinner size="md" text="Loading customer…" />
+              ) : (() => {
+                if (!detail) return null;
+                const { user: u, orders } = detail;
+                const totalSpent = orders.reduce((s, o) => s + (o.status !== 'cancelled' && o.status !== 'refunded' ? (o.total || 0) : 0), 0);
+                return (
+                  <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                    {/* Avatar + name */}
+                    <div style={{ display:'flex', alignItems:'center', gap:12, padding:14, background:'#1C1910', borderRadius:12, border:'1px solid rgba(201,162,39,0.07)' }}>
+                      <div style={{ width:48, height:48, borderRadius:12, flexShrink:0, background:'linear-gradient(135deg,#7a5200,#C9A227)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:900, fontSize:20 }}>
+                        {u.name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div style={{ minWidth:0 }}>
+                        <p style={{ color:'#E8D8A0', fontWeight:900, fontSize:15 }}>{u.name}</p>
+                        <p style={{ color:'#6B5B30', fontSize:12, marginTop:2 }}>{u.email}</p>
+                        {u.phone && <p style={{ color:'#8A7A5A', fontSize:12 }}>📞 {u.phone}</p>}
+                      </div>
+                    </div>
+                    {/* Stats */}
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
+                      {[
+                        { label:'Orders',   value: orders.length },
+                        { label:'Delivered', value: orders.filter(o=>o.status==='delivered').length },
+                        { label:'Spent',     value: `₹${totalSpent.toLocaleString()}` },
+                      ].map(({ label, value }) => (
+                        <div key={label} style={{ background:'#1C1910', border:'1px solid rgba(201,162,39,0.07)', borderRadius:10, padding:'10px 8px', textAlign:'center' }}>
+                          <p style={{ color:'#6B5B30', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:1, marginBottom:4 }}>{label}</p>
+                          <p style={{ color:'#C9A227', fontWeight:900, fontSize:15 }}>{value}</p>
                         </div>
-                        <div className="text-right">
-                          <StatusBadge status={o.status} />
-                          <p className="text-xs font-black text-[#1C1C1C] mt-1">₹{o.total?.toLocaleString()}</p>
+                      ))}
+                    </div>
+                    {/* Address */}
+                    {u.address && (u.address.city || u.address.street) && (
+                      <div style={{ background:'#1C1910', border:'1px solid rgba(201,162,39,0.07)', borderRadius:10, padding:12 }}>
+                        <p style={{ color:'#6B5B30', fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:1, marginBottom:6 }}>📍 Address</p>
+                        {u.address.street && <p style={{ color:'#E8D8A0', fontSize:13, fontWeight:600 }}>{u.address.street}</p>}
+                        <p style={{ color:'#8A7A5A', fontSize:12 }}>{[u.address.city, u.address.state, u.address.pincode].filter(Boolean).join(', ')}</p>
+                      </div>
+                    )}
+                    {/* Recent orders */}
+                    {orders.length > 0 && (
+                      <div>
+                        <p style={{ color:'#8A7A5A', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, marginBottom:8 }}>Order History ({orders.length})</p>
+                        <div style={{ display:'flex', flexDirection:'column', gap:7, maxHeight:200, overflowY:'auto' }}>
+                          {orders.slice(0,10).map(o => (
+                            <div key={o._id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', background:'#1C1910', borderRadius:10, border:'1px solid rgba(201,162,39,0.07)' }}>
+                              <div>
+                                <p style={{ color:'#C9A227', fontSize:12, fontWeight:700 }}>{o.orderNumber}</p>
+                                <p style={{ color:'#6B5B30', fontSize:11 }}>{new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</p>
+                              </div>
+                              <div style={{ textAlign:'right' }}>
+                                <StatusBadge status={o.status} />
+                                <p style={{ color:'#E8D8A0', fontSize:12, fontWeight:700, marginTop:3 }}>₹{o.total?.toLocaleString()}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
+                    {orders.length === 0 && (
+                      <div style={{ padding:'20px', textAlign:'center', background:'#1C1910', borderRadius:10, color:'#6B5B30', fontSize:13 }}>No orders placed yet</div>
+                    )}
                   </div>
-                </div>
-              )}
-              {orders.length === 0 && (
-                <div className="p-6 text-center rounded-xl" style={{ background:'#F7F5F0' }}>
-                  <p className="text-sm text-[#ABABAB] font-semibold">No orders placed yet</p>
-                </div>
-              )}
+                );
+              })()}
             </div>
-          );
-        })()}
-      </Modal>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

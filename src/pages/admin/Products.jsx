@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import api from '../../utils/api';
 import AdminLayout from '../../components/AdminLayout';
 import { LoadingSpinner } from '../../components/UI';
+import resolveImg from '../../utils/resolveImg';
 
 /* ─── constants ─────────────────────────────────────── */
 const CATEGORIES = ['pendant', 'table', 'wall', 'ceiling', 'floor', 'outdoor', 'smart', 'other'];
@@ -476,7 +477,7 @@ export default function AdminProducts() {
     });
     setImages(
       (product.images || []).map(url => ({
-        preview: url.startsWith('http') ? url : `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}${url}`,
+        preview: resolveImg(url),
         url,
         id: Math.random().toString(36).slice(2),
         isNew: false
